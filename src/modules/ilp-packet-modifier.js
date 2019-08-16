@@ -39,7 +39,6 @@ function padRightString(str, length = 20) {
     for (let i = 0; i < lengthDiff; i++) {
         paddedStr += 'x';
     }
-    console.log('padded string', paddedStr);
     return paddedStr;
 }
 function pad(n) {
