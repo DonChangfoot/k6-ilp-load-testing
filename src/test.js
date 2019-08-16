@@ -16,7 +16,7 @@ export default function() {
 
   modifyDestination(prepareTemplate, 'test.connector.' + __VU)
 
-  const response = http.post("http://localhost:3000/packet", test[0], { headers: { 'Content-Type': 'application/octet-stream' }, responseType: 'binary' })
+  const response = http.post("http://localhost:3000/packet", prepareTemplate, { headers: { 'Content-Type': 'application/octet-stream' }, responseType: 'binary' })
 
   if (response.body[0] === 13) {
     fulfillCounter.add(1)
