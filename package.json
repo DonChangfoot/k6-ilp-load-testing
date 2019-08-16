@@ -6,7 +6,8 @@
   "scripts": {
     "build": "tsc && cp build/src/util/ilp-packet-modifier.js src/modules",
     "start:server": "npm run build && node build/src/util/packetServer.js",
-    "writePrepareTemplateToFile": "npm run build && node build/src/util/writePacketToFile.js"
+    "writePrepareTemplateToFile": "npm run build && node build/src/util/writePacketToFile.js",
+    "throughput": "node build/src/util/throughput.js"
   },
   "author": "",
   "license": "ISC",
