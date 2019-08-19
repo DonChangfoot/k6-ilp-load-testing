@@ -4,7 +4,7 @@ jobs:
   build: # runs not using Workflows must have a `build` job as entry point
     docker: # run the steps with Docker
       - image: circleci/node:lts
-      - image: packet-server #this is the docker image of the application that is to be load tested. Requirements: Ilp-endpoint localhost:3000/ilp, health-endpoint: localhost:3000/health
+      - image: donchangfoot/packet-server # fallback application that is to be load tested. Requirements: Ilp-endpoint localhost:3000/ilp, health-endpoint: localhost:3000/health
 
     environment: # environment variables for the build itself
       TEST_RESULTS: /tmp/test-results # path to where test results will be saved
