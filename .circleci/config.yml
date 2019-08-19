@@ -1,0 +1,75 @@
+version: 2
+
+jobs:
+  build: # runs not using Workflows must have a `build` job as entry point
+    docker: # run the steps with Docker
+      - image: circleci/node:lts
+      - image: packet-server #this is the docker image of the application that is to be load tested. Requirements: Ilp-endpoint localhost:3000/ilp, health-endpoint: localhost:3000/health
+
+    environment: # environment variables for the build itself
+      TEST_RESULTS: /tmp/test-results # path to where test results will be saved
+      VUS: '50'
+      ITERATIONS: '8000'
+      CONNECTOR_ILP_ENDPOINT: 'http://localhost:3000/ilp'
+
+    steps: # steps that comprise the `build` job
+      - checkout
+      - run: mkdir -p $TEST_RESULTS # create the test results director
+      - run: mkdir -p ~/k6-bin # create the test results director
+
+      - run:
+          name: Install
+          command: npm install
+
+      - run:
+          name: Build
+          command: npm run build
+
+      - run:
+          name: ls
+          command: ls ~/project
+
+      - restore_cache:
+          keys:
+            - k6-bin
+
+      - run:
+          name: Install k6
+          command: |
+            if [[ ! -f ~/k6-bin/k6 ]]; then
+              curl -O -L https://github.com/loadimpact/k6/releases/download/v0.25.1/k6-v0.25.1-linux64.tar.gz;
+              tar -xvzf k6-v0.25.1-linux64.tar.gz;
+              mv k6-v0.25.1-linux64/k6 ~/k6-bin/k6;
+            fi
+
+      - save_cache:
+          key: k6-bin
+          paths:
+            - "~/k6-bin"
+
+      # Wait for application to be ready
+      - run:
+          name: Waiting for application to be ready
+          command: dockerize -wait http://localhost:3000/health -timeout 1m
+
+      - run :
+          name: Run k6
+          command: |
+            ~/k6-bin/k6 run --out json=/tmp/test-results/results.json --vus ${VUS} --iterations ${ITERATIONS}  ~/project/src/test.js
+
+      - run :
+          name: Calc throughput
+          command: npm run throughput
+          environment:
+            JSON_RESULTS_PATH: /tmp/test-results/results.json
+            THROUGHPUT_OUTPUT_PATH: /tmp/test-results/throughput.json
+
+      # - store_artifacts: # upload test summary for display in Artifacts
+      #     path: /tmp/test-results
+      #     destination: raw-test-output
+
+workflows:
+  version: 2
+  build-workflow:
+    jobs:
+      - build
