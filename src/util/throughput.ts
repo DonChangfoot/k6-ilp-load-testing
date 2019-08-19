@@ -2,6 +2,7 @@ import { createInterface } from 'readline'
 import fs from 'fs'
 
 const JSON_RESULTS_PATH = process.env.JSON_RESULTS_PATH || ''
+const THROUGHPUT_OUTPUT_PATH = process.env.THROUGHPUT_OUTPUT_PATH || './throughput.json'
 
 type K6ResultEntry = { 
   type: 'Metric' | 'Point'
@@ -27,6 +28,17 @@ readInterface.on('close', function () {
   const min = Math.min(...http_req_durations)/1000
   const max = Math.max(...http_req_durations)/1000
   const avg = http_req_durations.reduce((prev: number, curr: number) => prev + curr, 0)/(http_req_durations.length * 1000)
+  const throughput = { max: 1/min, min: 1/max, avg: 1/avg }
 
-  console.log('throughput (reqs/s):', { min: 1/min, max: 1/max, avg: 1/avg })
+  fs.writeFile(THROUGHPUT_OUTPUT_PATH, throughput, 'utf8', function (err) {
+    if (err) {
+        console.log("An error occured while writing JSON Object to File.");
+        return console.log(err);
+    }
+ 
+    console.log("JSON file has been saved." + THROUGHPUT_OUTPUT_PATH);
+});
+
+
+  console.log('throughput (reqs/s):', throughput)
 })
