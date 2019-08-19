@@ -28,9 +28,24 @@ readInterface.on('close', function () {
   const min = Math.min(...http_req_durations)/1000
   const max = Math.max(...http_req_durations)/1000
   const avg = http_req_durations.reduce((prev: number, curr: number) => prev + curr, 0)/(http_req_durations.length * 1000)
-  const throughput = { max: 1/min, min: 1/max, avg: 1/avg }
+  const numberFulfills = data.filter((line: K6ResultEntry) => {
+    return line.type === 'Point' && line.metric === 'fulfills'
+  }).map((line: K6ResultEntry) => line.data.value).length
+  const numberRejects = data.filter((line: K6ResultEntry) => {
+    return line.type === 'Point' && line.metric === 'rejects'
+  }).map((line: K6ResultEntry) => line.data.value).length
+  const numberUnknown = data.filter((line: K6ResultEntry) => {
+    return line.type === 'Point' && line.metric === 'unknown response'
+  }).map((line: K6ResultEntry) => line.data.value).length
 
-  fs.writeFile(THROUGHPUT_OUTPUT_PATH, throughput, 'utf8', function (err) {
+  const throughput = {
+    requestsPerSecond: { max: 1/min, min: 1/max, avg: 1/avg },
+    fulfills: numberFulfills,
+    rejects: numberRejects,
+    unknown: numberUnknown
+  }
+
+  fs.writeFile(THROUGHPUT_OUTPUT_PATH, JSON.stringify(throughput), 'utf8', function (err) {
     if (err) {
         console.log("An error occured while writing JSON Object to File.");
         return console.log(err);
