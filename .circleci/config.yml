@@ -8,8 +8,8 @@ jobs:
 
     environment: # environment variables for the build itself
       TEST_RESULTS: /tmp/test-results # path to where test results will be saved
-      VUS: '50'
-      ITERATIONS: '8000'
+      VUS: '5'
+      ITERATIONS: '500'
       CONNECTOR_ILP_ENDPOINT: 'http://localhost:3000/ilp'
 
     steps: # steps that comprise the `build` job
