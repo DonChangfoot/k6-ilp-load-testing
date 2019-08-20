@@ -4,14 +4,17 @@ jobs:
   build: # runs not using Workflows must have a `build` job as entry point
     docker: # run the steps with Docker
       - image: circleci/node:lts
-      - image: ${CONNECTOR_IMAGE} # fallback application that is to be load tested. Requirements: Ilp-endpoint localhost:3000/ilp, health-endpoint: localhost:3000/health
+      # Below image is of application that is to be load tested. Requirements: Ilp-endpoint localhost:3000/, health-endpoint: localhost:3000/health. Health endpoint should be public
+      # Ilp packets will be send with bearer token set to peerId. ie Authorization:Bearer 1xxxx
+      # It should add have at least VUS amount of peers, with ids of the format 1xxxx
+      - image: ${CONNECTOR_IMAGE}
 
     environment: # environment variables for the build itself
       TEST_RESULTS: /tmp/test-results # path to where test results will be saved
-      VUS: '5'
-      ITERATIONS: '500'
-      CONNECTOR_ILP_ENDPOINT: 'http://localhost:3000/ilp'
-      CONNECTOR_IMAGE: 'donchangfoot/packet-server'
+      VUS: '30'
+      ITERATIONS: '8000'
+      CONNECTOR_ILP_ENDPOINT: 'http://localhost:3000/'
+      CONNECTOR_IMAGE: 'donchangfoot/rafiki:benchmarkv2'
 
     steps: # steps that comprise the `build` job
       - checkout
@@ -25,10 +28,6 @@ jobs:
       - run:
           name: Build
           command: npm run build
-
-      - run:
-          name: ls
-          command: ls ~/project
 
       - restore_cache:
           keys:
