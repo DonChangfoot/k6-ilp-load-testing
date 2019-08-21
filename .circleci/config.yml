@@ -11,8 +11,9 @@ jobs:
 
     environment: # environment variables for the build itself
       TEST_RESULTS: /tmp/test-results # path to where test results will be saved
-      VUS: '30'
+      VUS: '25'
       ITERATIONS: '8000'
+      DURATION: '60s'
       CONNECTOR_ILP_ENDPOINT: 'http://localhost:3000/'
       CONNECTOR_IMAGE: 'donchangfoot/rafiki:benchmarkv2'
 
@@ -55,7 +56,7 @@ jobs:
       - run :
           name: Run k6
           command: |
-            ~/k6-bin/k6 run --out json=/tmp/test-results/results.json --vus ${VUS} --iterations ${ITERATIONS}  ~/project/src/test.js
+            ~/k6-bin/k6 run --out json=/tmp/test-results/results.json --out cloud --vus ${VUS} --iterations ${ITERATIONS} --duration ${DURATION}  ~/project/src/test.js
 
       - run :
           name: Calc throughput
